@@ -1,9 +1,10 @@
-import pickle
-import pandas as pd
+import sys
+sys.path.append('..')
 import numpy as np
 from sklearn.metrics import accuracy_score
+from model import Model
 
-class NaiveBayes:
+class NaiveBayes(Model):
     def __init__(self):
         self.classes = None
         self.prior_probs = None
@@ -56,33 +57,58 @@ class NaiveBayes:
         print("Akurasi model Naive Bayes (tanpa sklearn): {:.2f}%".format(acc * 100))
         return acc
 
-    def load(self):
-        data = pd.read_csv('data_train.csv')
-        return data
+    def main():
+        # tanya user untuk pakai model atau tidak
+        user_input_correct = False
+        model_loaded = False
+        while not user_input_correct:
+            print("Apakah ingin menggunakan model?")
+            print(" 1 : ya")
+            print(" 2 : tidak")
+            with_model = int(input())
 
-    def loadFile(filename):
-        with open(filename, 'rb') as file:
-            return pickle.load(file)
+            if (with_model == 1):
+                user_input_correct = True
+                model_loaded = True
+                model = NaiveBayes.loadFile("../models/naive_bayes_model.pkl")
+            elif (with_model == 2):
+                user_input_correct = True
+                model = NaiveBayes()
+            else:
+                print("Input tidak valid?")
+            
 
-    def save(self, filename):
-        with open(filename, 'wb') as file:
-            pickle.dump(self, file)
+        data = model.load()
+        # Memisahkan fitur (features) dan label (target)
+        x = data.drop('price_range', axis=1)
+        y = data['price_range']
+        # print(X)
 
+        # Inisialisasi dan melatih model NaiveBayes
+        if not model_loaded:
+            model.fit(x, y)
+            
+        model.predict(x)
+        model.sklearn_accuracy(y)
+        model.manual_accuracy(y)
 
-# Load data
-nb = NaiveBayes()
-data = nb.load()
+        # tanya user untuk menyimpan model atau tidak
+        user_input_correct = False
+        while not user_input_correct:
+            print("Apakah ingin menyimpan model?")
+            print(" 1 : ya")
+            print(" 2 : tidak")
+            user_want_to_save = int(input())
 
-# Memisahkan fitur (features) dan label (target)
-X = data.drop('price_range', axis=1)
-y = data['price_range']
+            if (user_want_to_save == 1):
+                user_input_correct = True
+                model.save('../models/naive_bayes_model.pkl')
+            elif (user_want_to_save == 2):
+                user_input_correct = True
+                continue
+            else:
+                print("Input tidak valid?")
+                
 
-# print(X)
-
-# Inisialisasi dan melatih model NaiveBayes
-nb.fit(X, y)
-nb.predict(X)
-nb.sklearn_accuracy(y)
-nb.manual_accuracy(y)
-
-nb.save('naive_bayes_model.pkl')
+if __name__ == "__main__":
+    NaiveBayes.main()

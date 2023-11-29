@@ -1,28 +1,26 @@
-from abc import ABC, abstractmethod
+import pickle
+import pandas as pd
 
-class Model(ABC):
-    @abstractmethod
-    def save(self, filename : str) : bool:
-        '''
-            Save the model to a file
-            will be saved to path: models/[filename]
-        
-            Args:
-                filename (str): the name of the file to save the model to
-            Returns:
-                bool: True if the model was saved successfully, False otherwise
-        '''
-        pass
+class Model():
+    def save(self, filename: str):
+        try:
+            with open(filename, 'wb') as file:
+                pickle.dump(self, file)
 
-    @abstractmethod
-    def load(self, filename):
-        '''
-            Load the model from a file
-            will be loaded from path: models/[filename]
-        
-            Args:
-                filename (str): the name of the file to load the model from
-            Returns:
-                bool: True if the model was loaded successfully, False otherwise
-        '''
-        pass
+            print(f"File {filename} saved successfully.")
+            return True
+        except Exception:
+            print(f"Error when saving file {filename}")
+            return False
+
+    def load(self):
+        data = pd.read_csv('data/data_train.csv')
+        return data
+    
+    def loadFile(filename):
+        try:
+            with open(filename, 'rb') as file:
+                return pickle.load(file)
+        except Exception:
+            print(f"Error when loading model file {filename}")
+            return False
