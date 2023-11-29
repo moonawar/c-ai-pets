@@ -38,7 +38,7 @@ class Predict(Model):
         y_train = data_train['price_range'].values
 
         # untuk prediksi
-        X_test = data_test.values
+        X_test = data_test.drop('id', axis=1).values
 
         # tanya user untuk pakai model atau tidak
         user_input_correct = False
