@@ -41,6 +41,7 @@ class KNN(Model):
             if (with_model == 1):
                 user_input_correct = True
                 knn = KNN.loadFile("../models/knn_model.pkl")
+                knn_sklearn = KNN.loadFile("../models/knn_model.pkl")
             elif (with_model == 2):
                 user_input_correct = True
                 k = 17
@@ -74,19 +75,22 @@ class KNN(Model):
         accuracy_value_sklearn = accuracy_score(y_validation, y_pred_sklearn)
         
         precision_value = precision(y_validation, y_pred)
-        # precision_value_sklearn = precision_score(y_validation, y_pred_sklearn, average='macro')
+        precision_value_sklearn = precision_score(y_validation, y_pred_sklearn, average='macro')
         
         recall_value = recall(y_validation, y_pred)
-        # recall_value_sklearn = recall_score(y_validation, y_pred_sklearn)
+        recall_value_sklearn = recall_score(y_validation, y_pred_sklearn, average='macro')
         
+        # from scratch
+        print("Hasil model KNN: ")
         print("Akurasi model KNN: {:.2f}%".format(accuracy_value * 100))
-        print("Akurasi model KNN sklearn: {:.2f}%".format(accuracy_value_sklearn * 100))
-        
         print("Precision model KNN: {:.2f}%".format(precision_value * 100))
-        # print("Precision model KNN sklearn: {:.2f}%".format(precision_value_sklearn * 100))
+        print("Recall model KNN: {:.2f}% \n".format(recall_value * 100))
         
-        print("Recall model KNN: {:.2f}%".format(recall_value * 100))
-        # print("Recall model KNN sklearn: {:.2f}%".format(recall_value_sklearn * 100))
+        # sklearn
+        print("Hasil model KNN sklearn: ")
+        print("Akurasi model KNN sklearn: {:.2f}%".format(accuracy_value_sklearn * 100))
+        print("Precision model KNN sklearn: {:.2f}%".format(precision_value_sklearn * 100))
+        print("Recall model KNN sklearn: {:.2f}% \n".format(recall_value_sklearn * 100))
         
         # tanya user untuk menyimpan model atau tidak
         user_input_correct = False
