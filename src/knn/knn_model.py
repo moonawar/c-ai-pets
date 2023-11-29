@@ -7,8 +7,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 class KNN(Model):
-    def __init__(self, k):
-        self.k = k
+    def __init__(self):
+        self.k = 19
 
     def fit(self, X, y):
         self.X_train = X
@@ -30,6 +30,17 @@ class KNN(Model):
         return predicted
     
     def main():
+        data_train = pd.read_csv('data/data_train.csv')
+        data_validation = pd.read_csv('data/data_validation.csv')
+
+        # untuk training
+        X_train = data_train.drop('price_range', axis=1).values
+        y_train = data_train['price_range'].values
+
+        # untuk validasi
+        X_validation = data_validation.drop('price_range', axis=1).values
+        y_validation = data_validation['price_range'].values
+
         # tanya user untuk pakai model atau tidak
         user_input_correct = False
         while not user_input_correct:
@@ -41,32 +52,15 @@ class KNN(Model):
             if (with_model == 1):
                 user_input_correct = True
                 knn = KNN.loadFile("../models/knn_model.pkl")
-                knn_sklearn = KNN.loadFile("../models/knn_model.pkl")
             elif (with_model == 2):
                 user_input_correct = True
-                k = 17
-                knn = KNN(k)
-                knn_sklearn = KNeighborsClassifier(n_neighbors=k)
-                data_train_url = 'https://drive.google.com/file/d/1cK8X26xG3eei3UI7Vdy_ocpDUT3Yhd9f/view?usp=sharing'
-                file_id = data_train_url.split('/')[-2]
-                data_train = pd.read_csv(f'https://drive.google.com/uc?id={file_id}')
-
-                X_train = data_train.drop('price_range', axis=1).values
-                y_train = data_train['price_range'].values
-
+                knn = KNN()
                 knn.fit(X_train, y_train)
-                knn_sklearn.fit(X_train, y_train)
             else:
                 print("Input tidak valid?")
-        
 
-        data_validation_url = 'https://drive.google.com/file/d/1YsrrsvceH2Fqs0Ke-LaNbeA6ITD50E1h/view?usp=sharing'
-        file_id = data_validation_url.split('/')[-2]
-        data_validation = pd.read_csv(f'https://drive.google.com/uc?id={file_id}')
-
-
-        X_validation = data_validation.drop('price_range', axis=1).values
-        y_validation = data_validation['price_range'].values
+        knn_sklearn = KNeighborsClassifier(n_neighbors = 19)
+        knn_sklearn.fit(X_train, y_train)
 
         y_pred = knn.predict(X_validation)
         y_pred_sklearn = knn_sklearn.predict(X_validation)

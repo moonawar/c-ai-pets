@@ -9,10 +9,7 @@ import pandas as pd
 
 class NaiveBayes(Model):
     def __init__(self):
-        self.classes = None
-        self.prior_probs = None
-        self.feature_stats_by_class = None
-        self.predictions = None
+        self.summaries = None
 
     def fit(self, X, y):
         summaries = {}
