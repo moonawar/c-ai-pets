@@ -6,7 +6,7 @@ from model import Model
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
-class Predict():
+class Predict(Model):
     def __init__(self):
         self.k = 19
 
@@ -61,7 +61,7 @@ class Predict():
         y_pred = model.predict(X_test)
         data_test['price_range'] = y_pred
         predicted_results = data_test[['id', 'price_range']]
-        predicted_results.to_csv('../data/submission.csv', index=False)
+        predicted_results.to_csv('data/submission.csv', index=False)
         
         # tanya user untuk menyimpan model atau tidak
         user_input_correct = False
