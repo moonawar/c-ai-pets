@@ -1,105 +1,56 @@
-import pandas as pd
 import numpy as np
-class KnnModel:
-    k : int
-    data : pd.DataFrame
-    scaler : [
-        {
-            'min' : float,
-            'max' : float
-        }
-    ]
+import pandas as pd
 
-    def __init__(self, k) -> None:
+class KNN:
+    def __init__(self, k):
         self.k = k
-        self.data = pd.DataFrame()
-        pass
 
-    def train(self, csv : str):
-        # load data from csv
-        source = pd.read_csv(csv)
-        scaler = []
-        target = source.pop('price_range')
-        for i, col in enumerate(source.columns):
-            # get min and max of each column
-            min = source[col].min()
-            max = source[col].max()
-            scaler.append({
-                'min' : min,
-                'max' : max
-            })
+    def fit(self, X, y):
+        self.X_train = X
+        self.y_train = y
 
-            # rescale column
-            source[col] = self._rescale(source[col], min, max)
+    def predict(self, X):
+        y_pred = [self._predict(x) for x in X]
+        return np.array(y_pred)
 
-        # save scaler
-        self.scaler = scaler
-
-        source['price_range'] = target
-
-        # rescale data
-        self.data = pd.concat([self.data, source])
-        pass
-
-
-    def predict(self, unseen_data : pd.Series) -> int:
-        if self.data.empty:
-            raise Exception("Model must be trained before predictions can be made")
-
-        # rescale unseen data
-        temp = unseen_data.copy()
-        for i, col in enumerate(unseen_data.index):
-            temp[col] = self._rescale(unseen_data[col], self.scaler[i]['min'], self.scaler[i]['max'])
-
-        unseen_data = temp
-        
-        # calculate euclidean distance between unseen data and all data in model
-        distances = self.data.apply(lambda x: self._euclidean_distance(x[:-1], unseen_data), axis=1)
-        distances = distances.sort_values(ascending=True)
-        res = []
-        for i in range(self.k):
-            res.append(self.data.iloc[distances.index[i]]['price_range'])
-
-        res = pd.Series(res)
-        modes = res.mode()
-
-        confidence = res.value_counts()[modes[0]] / self.k * 100
-        return modes[0]
-        
-
-    def _euclidean_distance(self, a : pd.Series, b : pd.Series) -> float:
-        # calculate euclidean distance between two rows
-        sq = lambda x: x ** 2
-        distance = 0
-        for i in range(len(a)):
-            distance += sq(a.iloc[i] - b.iloc[i])
-
-        return distance ** 0.5
-
-    def _rescale(self, data : pd.Series, min : float, max : float) -> pd.Series:
-        # rescale data to 0 - 100
-        return (data - min) / (max - min) * 100
+    def _predict(self, x):
+        distances = [euclidean_distance(x, x_train) for x_train in self.X_train]
+        k_indices = np.argsort(distances)[:self.k]
+        k_nearest_labels = [self.y_train[i] for i in k_indices]
+        common = np.argmax(np.bincount(k_nearest_labels))
+        return common
     
-    def saveTo(cls, filename : str):
-        pass
+def euclidean_distance(x1, x2):
+    return np.sqrt(np.sum((x1 - x2) ** 2))
 
-    @staticmethod
-    def loadFrom(cls, filename : str) -> 'KnnModel':
-        pass
+def accuracy(y_true, y_pred):
+    correct = 0
+    for yt, yp in zip(y_true, y_pred):
+        if yt == yp:
+            correct += 1
+    return correct / len(y_true)
 
 if __name__ == "__main__":
-    model = KnnModel(21)
-    model.train('data/data_train.csv')
+    data_train_url = 'https://drive.google.com/file/d/1cK8X26xG3eei3UI7Vdy_ocpDUT3Yhd9f/view?usp=sharing'
+    file_id = data_train_url.split('/')[-2]
+    data_train = pd.read_csv(f'https://drive.google.com/uc?id={file_id}')
 
-    validation = pd.read_csv('data/data_validation.csv')
-    target = validation.pop('price_range')
+    X_train = data_train.iloc[:, :-1].values
+    y_train = data_train.iloc[:, -1].values
 
-    correct_count = 0
+    data_validation_url = 'https://drive.google.com/file/d/1YsrrsvceH2Fqs0Ke-LaNbeA6ITD50E1h/view?usp=sharing'
+    file_id = data_validation_url.split('/')[-2]
+    data_validation = pd.read_csv(f'https://drive.google.com/uc?id={file_id}')
 
-    for i in range(len(validation)):
-        predicted = model.predict(validation.iloc[i])
-        actual = target[i]
-        if predicted == actual:
-            correct_count += 1
+    X_validation = data_validation.iloc[:, :-1].values
+    y_validation = data_validation.iloc[:, -1].values
 
-    print(f"accuracy: {correct_count / len(validation) * 100}%")
+    k = 17
+
+    knn = KNN(k)
+    knn.fit(X_train, y_train)
+
+    y_pred = knn.predict(X_validation)
+
+    accuracy_value = accuracy(y_validation, y_pred)
+    print("Akurasi:", accuracy_value)
